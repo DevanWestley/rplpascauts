@@ -1,3 +1,4 @@
+
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -31,7 +32,13 @@ const petitionFormSchema = z.object({
 type PetitionFormValues = z.infer<typeof petitionFormSchema>
 
 const defaultValues: Partial<PetitionFormValues> = {
+  title: "",
+  description: "",
+  target: 1000,
   visibility: "public",
+  category: undefined,
+  deadline: undefined,
+  attachments: undefined,
 };
 
 export default function CreatePetitionPage() {
