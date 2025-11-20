@@ -1,0 +1,69 @@
+import Link from 'next/link';
+import Image from 'next/image';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import type { ImagePlaceholder } from '@/lib/placeholder-images';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
+
+interface Petition {
+  id: string;
+  title: string;
+  category: string;
+  signatures: number;
+  target: number;
+  image: string; // Corresponds to id in placeholder-images.json
+}
+
+interface PetitionCardProps {
+  petition: Petition;
+}
+
+export function PetitionCard({ petition }: PetitionCardProps) {
+  const percentage = (petition.signatures / petition.target) * 100;
+  const image: ImagePlaceholder | undefined = PlaceHolderImages.find(p => p.id === petition.image);
+
+  return (
+    <Card className="flex flex-col h-full overflow-hidden transition-shadow hover:shadow-lg duration-300">
+      <CardHeader className="p-0">
+        <Link href={`/petitions/${petition.id}`} className="block relative aspect-[4/3]">
+          {image ? (
+            <Image
+              src={image.imageUrl}
+              alt={image.description}
+              data-ai-hint={image.imageHint}
+              fill
+              className="object-cover rounded-t-lg"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            />
+          ) : (
+            <div className="bg-muted w-full h-full"></div>
+          )}
+          <Badge variant="secondary" className="absolute top-3 left-3">{petition.category}</Badge>
+        </Link>
+      </CardHeader>
+      <div className="p-4 flex flex-col flex-grow">
+        <CardTitle className="text-lg leading-tight mb-4 flex-grow">
+          <Link href={`/petitions/${petition.id}`} className="hover:underline">
+            {petition.title}
+          </Link>
+        </CardTitle>
+        <CardContent className="p-0 mb-4">
+          <div className="flex justify-between items-center mb-2 text-sm text-muted-foreground">
+            <span>
+              <strong className="text-foreground">{petition.signatures.toLocaleString()}</strong> signatures
+            </span>
+            <span className="font-semibold">{percentage.toFixed(0)}%</span>
+          </div>
+          <Progress value={percentage} aria-label={`${percentage.toFixed(0)}% of target signatures`} />
+        </CardContent>
+        <CardFooter className="p-0">
+          <Button asChild className="w-full" variant="outline">
+            <Link href={`/petitions/${petition.id}`}>View & Sign</Link>
+          </Button>
+        </CardFooter>
+      </div>
+    </Card>
+  );
+}
