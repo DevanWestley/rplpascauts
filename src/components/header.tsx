@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -69,11 +69,15 @@ export function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent side="right">
-              <nav className="grid gap-4 text-lg font-medium mt-8">
-                <Link href="/" className="flex items-center gap-2 text-lg font-semibold mb-4">
-                  <Logo className="h-8 w-8" />
-                  <span>Suara Kita</span>
-                </Link>
+              <SheetHeader>
+                <SheetTitle>
+                  <Link href="/" className="flex items-center gap-2 text-lg font-semibold mb-4">
+                    <Logo className="h-8 w-8" />
+                    <span>Suara Kita</span>
+                  </Link>
+                </SheetTitle>
+              </SheetHeader>
+              <nav className="grid gap-4 text-lg font-medium mt-4">
                 <Link href="/" className="hover:text-primary transition-colors">Beranda</Link>
                 <Link href="/#petitions" className="hover:text-primary transition-colors">Jelajahi</Link>
                 <Link href="/petitions/create" className="hover:text-primary transition-colors">Mulai Petisi</Link>
