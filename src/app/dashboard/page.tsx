@@ -23,8 +23,8 @@ import { BarChart, FileText, TrendingUp, Users } from "lucide-react"
 const userPetitions = [
   {
     id: '1',
-    title: 'Protect Our Local Park from Urban Development',
-    category: 'Environment',
+    title: 'Lindungi Taman Lokal Kita dari Pembangunan Kota',
+    category: 'Lingkungan',
     signatures: 1250,
     target: 5000,
     image: 'park-image',
@@ -32,8 +32,8 @@ const userPetitions = [
   },
   {
     id: '4',
-    title: 'Build a New No-Kill Animal Shelter',
-    category: 'Animal Rights',
+    title: 'Bangun Penampungan Hewan Baru Tanpa Eutanasia',
+    category: 'Hak-Hak Hewan',
     signatures: 4112,
     target: 10000,
     image: 'animal-shelter-image',
@@ -41,8 +41,8 @@ const userPetitions = [
   },
   {
     id: '2',
-    title: 'Improve Public Transportation in Downtown Area',
-    category: 'Urban Development',
+    title: 'Tingkatkan Transportasi Publik di Area Pusat Kota',
+    category: 'Pembangunan Kota',
     signatures: 1000,
     target: 1000,
     image: 'bus-image',
@@ -51,10 +51,10 @@ const userPetitions = [
 ];
 
 const recentSignatures = [
-    { name: 'Alice Johnson', location: 'San Francisco, USA', comment: 'This is crucial for our community!', signedAt: '15 minutes ago' },
-    { name: 'Bob Williams', location: 'London, UK', comment: '', signedAt: '1 hour ago' },
-    { name: 'Charlie Brown', location: 'Sydney, Australia', comment: 'Happy to support this initiative.', signedAt: '3 hours ago' },
-    { name: 'Diana Miller', location: 'Toronto, Canada', comment: 'We must protect our green spaces.', signedAt: '5 hours ago' },
+    { name: 'Alice Johnson', location: 'San Francisco, USA', comment: 'Ini sangat penting untuk komunitas kita!', signedAt: '15 menit lalu' },
+    { name: 'Bob Williams', location: 'London, UK', comment: '', signedAt: '1 jam lalu' },
+    { name: 'Charlie Brown', location: 'Sydney, Australia', comment: 'Senang mendukung inisiatif ini.', signedAt: '3 jam lalu' },
+    { name: 'Diana Miller', location: 'Toronto, Canada', comment: 'Kita harus melindungi ruang hijau kita.', signedAt: '5 jam lalu' },
 ];
 
 export default function DashboardPage() {
@@ -65,49 +65,49 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8">
       <header>
-        <h1 className="text-3xl md:text-4xl font-bold font-headline">My Dashboard</h1>
-        <p className="text-muted-foreground">Welcome back! Here's an overview of your advocacy efforts.</p>
+        <h1 className="text-3xl md:text-4xl font-bold font-headline">Dasbor Saya</h1>
+        <p className="text-muted-foreground">Selamat datang kembali! Berikut adalah gambaran umum dari upaya advokasi Anda.</p>
       </header>
 
       <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Signatures</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Tanda Tangan</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalSignatures.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">Across all your petitions</p>
+            <div className="text-2xl font-bold">{totalSignatures.toLocaleString('id-ID')}</div>
+            <p className="text-xs text-muted-foreground">Di semua petisi Anda</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Petitions</CardTitle>
+            <CardTitle className="text-sm font-medium">Petisi Aktif</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{activePetitions.length}</div>
-            <p className="text-xs text-muted-foreground">Currently collecting signatures</p>
+            <p className="text-xs text-muted-foreground">Sedang mengumpulkan tanda tangan</p>
           </CardContent>
         </Card>
          <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Most Popular</CardTitle>
+            <CardTitle className="text-sm font-medium">Paling Populer</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold truncate">Protect Our Park</div>
-            <p className="text-xs text-muted-foreground">with {userPetitions[0].signatures.toLocaleString()} signatures</p>
+            <div className="text-2xl font-bold truncate">Lindungi Taman Kita</div>
+            <p className="text-xs text-muted-foreground">dengan {userPetitions[0].signatures.toLocaleString('id-ID')} tanda tangan</p>
           </CardContent>
         </Card>
          <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg. Goal Progress</CardTitle>
+            <CardTitle className="text-sm font-medium">Rata-rata Progres</CardTitle>
             <BarChart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">75%</div>
-            <p className="text-xs text-muted-foreground">Average progress to target</p>
+            <p className="text-xs text-muted-foreground">Rata-rata progres menuju target</p>
           </CardContent>
         </Card>
       </section>
@@ -115,8 +115,8 @@ export default function DashboardPage() {
       <section>
         <Tabs defaultValue="active">
           <TabsList className="grid w-full grid-cols-2 md:w-[400px]">
-            <TabsTrigger value="active">Active Petitions</TabsTrigger>
-            <TabsTrigger value="ended">Ended Petitions</TabsTrigger>
+            <TabsTrigger value="active">Petisi Aktif</TabsTrigger>
+            <TabsTrigger value="ended">Petisi Berakhir</TabsTrigger>
           </TabsList>
           <TabsContent value="active" className="mt-6">
             {activePetitions.length > 0 ? (
@@ -126,7 +126,7 @@ export default function DashboardPage() {
                     ))}
                 </div>
             ) : (
-                <p className="text-muted-foreground text-center py-8">You have no active petitions.</p>
+                <p className="text-muted-foreground text-center py-8">Anda tidak memiliki petisi aktif.</p>
             )}
           </TabsContent>
           <TabsContent value="ended" className="mt-6">
@@ -137,14 +137,14 @@ export default function DashboardPage() {
                     ))}
                 </div>
              ) : (
-                <p className="text-muted-foreground text-center py-8">You have no ended petitions.</p>
+                <p className="text-muted-foreground text-center py-8">Anda tidak memiliki petisi yang sudah berakhir.</p>
             )}
           </TabsContent>
         </Tabs>
       </section>
 
       <section className="space-y-4">
-        <h2 className="text-2xl font-bold font-headline">Petition Analytics: <span className="text-primary/90">{userPetitions[0].title}</span></h2>
+        <h2 className="text-2xl font-bold font-headline">Analitik Petisi: <span className="text-primary/90">{userPetitions[0].title}</span></h2>
         <div className="grid gap-8 lg:grid-cols-2">
           <SignaturesChart />
           <TrafficChart />
@@ -154,16 +154,16 @@ export default function DashboardPage() {
       <section>
         <Card>
           <CardHeader>
-            <CardTitle>Recent Supporters</CardTitle>
-            <CardDescription>Latest signatures across all your active petitions.</CardDescription>
+            <CardTitle>Pendukung Terbaru</CardTitle>
+            <CardDescription>Tanda tangan terbaru di semua petisi aktif Anda.</CardDescription>
           </CardHeader>
           <CardContent>
              <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Supporter</TableHead>
-                  <TableHead className="hidden sm:table-cell">Comment</TableHead>
-                  <TableHead className="text-right">Signed</TableHead>
+                  <TableHead>Pendukung</TableHead>
+                  <TableHead className="hidden sm:table-cell">Komentar</TableHead>
+                  <TableHead className="text-right">Menandatangani</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -173,7 +173,7 @@ export default function DashboardPage() {
                       <p className="font-semibold">{supporter.name}</p>
                       <p className="text-sm text-muted-foreground">{supporter.location}</p>
                     </TableCell>
-                     <TableCell className="hidden sm:table-cell italic max-w-xs truncate">{supporter.comment || "No comment provided"}</TableCell>
+                     <TableCell className="hidden sm:table-cell italic max-w-xs truncate">{supporter.comment || "Tidak ada komentar"}</TableCell>
                     <TableCell className="text-right text-xs text-muted-foreground">{supporter.signedAt}</TableCell>
                   </TableRow>
                 ))}

@@ -21,7 +21,7 @@ const chartData = [
 
 const chartConfig = {
   signatures: {
-    label: "Signatures",
+    label: "Tanda Tangan",
     color: "hsl(var(--chart-1))",
   },
 } satisfies ChartConfig
@@ -30,8 +30,8 @@ export function SignaturesChart() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Signatures Over Time</CardTitle>
-        <CardDescription>Daily signature count for the last 7 days.</CardDescription>
+        <CardTitle>Tanda Tangan Seiring Waktu</CardTitle>
+        <CardDescription>Jumlah tanda tangan harian selama 7 hari terakhir.</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="h-[250px] w-full">
@@ -51,7 +51,7 @@ export function SignaturesChart() {
               axisLine={false}
               tickMargin={8}
               tickFormatter={(value) =>
-                new Date(value).toLocaleDateString("en-US", {
+                new Date(value).toLocaleDateString("id-ID", {
                   month: "short",
                   day: "numeric",
                 })

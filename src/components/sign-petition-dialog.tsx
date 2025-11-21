@@ -26,8 +26,8 @@ export function SignPetitionDialog({ children }: { children: React.ReactNode }) 
     // Here you would handle form submission, e.g., send to an API
     // For now, we just show a success toast and close the dialog.
     toast({
-      title: "Signature Submitted!",
-      description: "Thank you for supporting this cause.",
+      title: "Tanda Tangan Terkirim!",
+      description: "Terima kasih telah mendukung perjuangan ini.",
     });
     setOpen(false);
   };
@@ -40,34 +40,34 @@ export function SignPetitionDialog({ children }: { children: React.ReactNode }) 
       <DialogContent className="sm:max-w-[425px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Add Your Signature</DialogTitle>
+            <DialogTitle>Tambahkan Tanda Tangan Anda</DialogTitle>
             <DialogDescription>
-              Your voice matters. Fill out the form below to sign this petition.
+              Suara Anda penting. Isi formulir di bawah ini untuk menandatangani petisi ini.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
+              <Label htmlFor="name">Nama Lengkap</Label>
               <Input id="name" required placeholder="John Doe" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email Address</Label>
-              <Input id="email" type="email" required placeholder="you@example.com" />
+              <Label htmlFor="email">Alamat Email</Label>
+              <Input id="email" type="email" required placeholder="anda@contoh.com" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="location">Location (Optional)</Label>
-              <Input id="location" placeholder="e.g., City, Country" />
+              <Label htmlFor="location">Lokasi (Opsional)</Label>
+              <Input id="location" placeholder="cth., Kota, Negara" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="comment">Comment (Optional)</Label>
-              <Textarea id="comment" placeholder="Why is this important to you?" />
+              <Label htmlFor="comment">Komentar (Opsional)</Label>
+              <Textarea id="comment" placeholder="Mengapa ini penting bagi Anda?" />
             </div>
           </div>
           <DialogFooter>
             <DialogClose asChild>
-              <Button type="button" variant="ghost">Cancel</Button>
+              <Button type="button" variant="ghost">Batal</Button>
             </DialogClose>
-            <Button type="submit">Submit Signature</Button>
+            <Button type="submit">Kirim Tanda Tangan</Button>
           </DialogFooter>
         </form>
       </DialogContent>

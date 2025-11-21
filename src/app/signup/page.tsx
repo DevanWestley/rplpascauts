@@ -9,20 +9,20 @@ export default function SignupPage() {
     <div className="flex items-center justify-center py-12">
       <Card className="mx-auto max-w-sm w-full">
         <CardHeader>
-          <CardTitle className="text-xl font-headline">Sign Up</CardTitle>
+          <CardTitle className="text-xl font-headline">Daftar</CardTitle>
           <CardDescription>
-            Enter your information to create an account
+            Masukkan informasi Anda untuk membuat akun
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="first-name">First name</Label>
+                <Label htmlFor="first-name">Nama depan</Label>
                 <Input id="first-name" placeholder="Max" required />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="last-name">Last name</Label>
+                <Label htmlFor="last-name">Nama belakang</Label>
                 <Input id="last-name" placeholder="Robinson" required />
               </div>
             </div>
@@ -36,17 +36,17 @@ export default function SignupPage() {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Kata Sandi</Label>
               <Input id="password" type="password" />
             </div>
             <Button type="submit" className="w-full">
-              Create an account
+              Buat akun
             </Button>
           </div>
           <div className="mt-4 text-center text-sm">
-            Already have an account?{" "}
+            Sudah punya akun?{" "}
             <Link href="/login" className="underline">
-              Login
+              Masuk
             </Link>
           </div>
         </CardContent>

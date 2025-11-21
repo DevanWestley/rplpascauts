@@ -52,15 +52,15 @@ export function PetitionCard({ petition }: PetitionCardProps) {
         <CardContent className="p-0 mb-4">
           <div className="flex justify-between items-center mb-2 text-sm text-muted-foreground">
             <span>
-              <strong className="text-foreground">{petition.signatures.toLocaleString()}</strong> signatures
+              <strong className="text-foreground">{petition.signatures.toLocaleString('id-ID')}</strong> tanda tangan
             </span>
             <span className="font-semibold">{percentage.toFixed(0)}%</span>
           </div>
-          <Progress value={percentage} aria-label={`${percentage.toFixed(0)}% of target signatures`} />
+          <Progress value={percentage} aria-label={`${percentage.toFixed(0)}% dari target tanda tangan`} />
         </CardContent>
         <CardFooter className="p-0">
           <Button asChild className="w-full" variant="outline">
-            <Link href={`/petitions/${petition.id}`}>View & Sign</Link>
+            <Link href={`/petitions/${petition.id}`}>Lihat & Tanda Tangani</Link>
           </Button>
         </CardFooter>
       </div>

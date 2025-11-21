@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form"
 import * as z from "zod"
 import { CalendarIcon } from "lucide-react"
 import { format } from "date-fns"
+import { id } from "date-fns/locale"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -20,12 +21,12 @@ import { useToast } from "@/hooks/use-toast"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 const petitionFormSchema = z.object({
-  title: z.string().min(10, { message: "Title must be at least 10 characters." }).max(150, { message: "Title must be 150 characters or less." }),
-  description: z.string().min(50, { message: "Description must be at least 50 characters." }),
-  target: z.coerce.number().min(1, { message: "Target must be at least 1." }),
-  category: z.string({ required_error: "Please select a category." }),
-  deadline: z.date({ required_error: "A deadline date is required." }),
-  visibility: z.enum(["public", "private"], { required_error: "You need to select a visibility option." }),
+  title: z.string().min(10, { message: "Judul harus terdiri dari minimal 10 karakter." }).max(150, { message: "Judul maksimal 150 karakter." }),
+  description: z.string().min(50, { message: "Deskripsi harus terdiri dari minimal 50 karakter." }),
+  target: z.coerce.number().min(1, { message: "Target harus minimal 1." }),
+  category: z.string({ required_error: "Silakan pilih kategori." }),
+  deadline: z.date({ required_error: "Tanggal batas waktu diperlukan." }),
+  visibility: z.enum(["public", "private"], { required_error: "Anda harus memilih opsi visibilitas." }),
   attachments: z.any().optional(),
 })
 
@@ -51,8 +52,8 @@ export default function CreatePetitionPage() {
 
   function onSubmit(data: PetitionFormValues) {
     toast({
-      title: "Petition Created!",
-      description: "Your petition has been successfully submitted for review.",
+      title: "Petisi Dibuat!",
+      description: "Petisi Anda telah berhasil dikirim untuk ditinjau.",
     });
     console.log(data);
   }
@@ -60,8 +61,8 @@ export default function CreatePetitionPage() {
   return (
     <Card className="max-w-4xl mx-auto">
       <CardHeader>
-        <CardTitle className="text-3xl font-headline">Create a New Petition</CardTitle>
-        <CardDescription>Fill in the details below to launch your campaign for change.</CardDescription>
+        <CardTitle className="text-3xl font-headline">Buat Petisi Baru</CardTitle>
+        <CardDescription>Isi detail di bawah ini untuk meluncurkan kampanye perubahan Anda.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -71,11 +72,11 @@ export default function CreatePetitionPage() {
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Petition Title</FormLabel>
+                  <FormLabel>Judul Petisi</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., Ban single-use plastics in our city" {...field} />
+                    <Input placeholder="cth., Larang plastik sekali pakai di kota kita" {...field} value={field.value || ''} />
                   </FormControl>
-                  <FormDescription>This will be the main headline for your petition.</FormDescription>
+                  <FormDescription>Ini akan menjadi judul utama untuk petisi Anda.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -85,11 +86,11 @@ export default function CreatePetitionPage() {
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>Deskripsi</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Tell the story behind your petition and why it's important..." className="min-h-[150px]" {...field} />
+                    <Textarea placeholder="Ceritakan kisah di balik petisi Anda dan mengapa itu penting..." className="min-h-[150px]" {...field} value={field.value || ''} />
                   </FormControl>
-                  <FormDescription>Explain the problem and your proposed solution.</FormDescription>
+                  <FormDescription>Jelaskan masalah dan solusi yang Anda usulkan.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -100,11 +101,11 @@ export default function CreatePetitionPage() {
                 name="target"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Signature Target</FormLabel>
+                    <FormLabel>Target Tanda Tangan</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="5000" {...field} />
+                      <Input type="number" placeholder="5000" {...field} value={field.value || ''} />
                     </FormControl>
-                    <FormDescription>How many signatures are you aiming for?</FormDescription>
+                    <FormDescription>Berapa banyak tanda tangan yang Anda targetkan?</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -114,20 +115,20 @@ export default function CreatePetitionPage() {
                 name="category"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Category</FormLabel>
+                    <FormLabel>Kategori</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select a category" />
+                          <SelectValue placeholder="Pilih kategori" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="environment">Environment</SelectItem>
-                        <SelectItem value="human-rights">Human Rights</SelectItem>
-                        <SelectItem value="education">Education</SelectItem>
-                        <SelectItem value="health">Health</SelectItem>
-                        <SelectItem value="animal-rights">Animal Rights</SelectItem>
-                        <SelectItem value="urban-development">Urban Development</SelectItem>
+                        <SelectItem value="lingkungan">Lingkungan</SelectItem>
+                        <SelectItem value="hak-asasi-manusia">Hak Asasi Manusia</SelectItem>
+                        <SelectItem value="pendidikan">Pendidikan</SelectItem>
+                        <SelectItem value="kesehatan">Kesehatan</SelectItem>
+                        <SelectItem value="hak-hewan">Hak-Hak Hewan</SelectItem>
+                        <SelectItem value="pembangunan-kota">Pembangunan Kota</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -140,7 +141,7 @@ export default function CreatePetitionPage() {
               name="deadline"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel>Deadline</FormLabel>
+                  <FormLabel>Batas Waktu</FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
@@ -152,9 +153,9 @@ export default function CreatePetitionPage() {
                           )}
                         >
                           {field.value ? (
-                            format(field.value, "PPP")
+                            format(field.value, "PPP", { locale: id })
                           ) : (
-                            <span>Pick a date</span>
+                            <span>Pilih tanggal</span>
                           )}
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
@@ -170,7 +171,7 @@ export default function CreatePetitionPage() {
                       />
                     </PopoverContent>
                   </Popover>
-                  <FormDescription>When will your petition end?</FormDescription>
+                  <FormDescription>Kapan petisi Anda akan berakhir?</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -181,11 +182,11 @@ export default function CreatePetitionPage() {
               name="attachments"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Image / Document</FormLabel>
+                  <FormLabel>Gambar / Dokumen</FormLabel>
                   <FormControl>
                     <Input type="file" onChange={(e) => field.onChange(e.target.files)} />
                   </FormControl>
-                  <FormDescription>Add a compelling image or a supporting document (optional).</FormDescription>
+                  <FormDescription>Tambahkan gambar yang menarik atau dokumen pendukung (opsional).</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -196,7 +197,7 @@ export default function CreatePetitionPage() {
               name="visibility"
               render={({ field }) => (
                 <FormItem className="space-y-3">
-                  <FormLabel>Visibility</FormLabel>
+                  <FormLabel>Visibilitas</FormLabel>
                   <FormControl>
                     <RadioGroup
                       onValueChange={field.onChange}
@@ -208,7 +209,7 @@ export default function CreatePetitionPage() {
                           <RadioGroupItem value="public" />
                         </FormControl>
                         <FormLabel className="font-normal">
-                          Public - Visible to everyone and can be found in search results.
+                          Publik - Terlihat oleh semua orang dan dapat ditemukan di hasil pencarian.
                         </FormLabel>
                       </FormItem>
                       <FormItem className="flex items-center space-x-3 space-y-0">
@@ -216,7 +217,7 @@ export default function CreatePetitionPage() {
                           <RadioGroupItem value="private" />
                         </FormControl>
                         <FormLabel className="font-normal">
-                          Private - Only people with the direct link can view and sign.
+                          Pribadi - Hanya orang dengan tautan langsung yang dapat melihat dan menandatangani.
                         </FormLabel>
                       </FormItem>
                     </RadioGroup>
@@ -225,7 +226,7 @@ export default function CreatePetitionPage() {
                 </FormItem>
               )}
             />
-            <Button type="submit">Create Petition</Button>
+            <Button type="submit">Buat Petisi</Button>
           </form>
         </Form>
       </CardContent>

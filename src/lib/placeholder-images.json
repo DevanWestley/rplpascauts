@@ -2,27 +2,27 @@
   "placeholderImages": [
     {
       "id": "park-image",
-      "description": "A lush green park with trees and a path.",
+      "description": "Taman hijau yang rimbun dengan pepohonan dan jalan setapak.",
       "imageUrl": "https://images.unsplash.com/photo-1690711405440-647ec48868d2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxwYXJrJTIwbmF0dXJlfGVufDB8fHx8MTc2MzU3MTQ4M3ww&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "park nature"
+      "imageHint": "taman alam"
     },
     {
       "id": "bus-image",
-      "description": "A city bus driving on a street.",
+      "description": "Bus kota yang sedang melaju di jalanan.",
       "imageUrl": "https://images.unsplash.com/photo-1598888603231-88e10ff0b5bd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxwdWJsaWMlMjB0cmFuc3BvcnRhdGlvbnxlbnwwfHx8fDE3NjM2Mjk4NjF8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "public transportation"
+      "imageHint": "transportasi publik"
     },
     {
       "id": "school-image",
-      "description": "A modern school building facade.",
+      "description": "Fasad bangunan sekolah modern.",
       "imageUrl": "https://images.unsplash.com/photo-1592066575517-58df903152f2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxzY2hvb2wlMjBidWlsZGluZ3xlbnwwfHx8fDE3NjM1OTU0MjV8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "school building"
+      "imageHint": "gedung sekolah"
     },
     {
       "id": "animal-shelter-image",
-      "description": "A cute dog looking through a fence at an animal shelter.",
+      "description": "Seekor anjing lucu melihat melalui pagar di sebuah penampungan hewan.",
       "imageUrl": "https://images.unsplash.com/photo-1542715234-bd0adb4249b7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxhbmltYWwlMjBzaGVsdGVyfGVufDB8fHx8MTc2MzYyOTg2MXww&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "animal shelter"
+      "imageHint": "penampungan hewan"
     }
   ]
 }
