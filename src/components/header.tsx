@@ -10,8 +10,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Menu, Mountain, User } from 'lucide-react';
+import { Menu, User } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import { Logo } from './logo';
 
 export function Header() {
   const isLoggedIn = true; // Placeholder for authentication state
@@ -20,7 +21,7 @@ export function Header() {
     <header className="bg-card shadow-sm sticky top-0 z-40">
       <div className="container mx-auto px-4 flex h-16 items-center justify-between">
         <Link href="/" className="flex items-center gap-2 font-bold text-lg">
-          <Mountain className="h-6 w-6 text-primary" />
+          <Logo className="h-8 w-8 text-primary" />
           <span className="font-headline">Suara Kita</span>
         </Link>
         <nav className="hidden md:flex items-center gap-4">
@@ -70,7 +71,7 @@ export function Header() {
             <SheetContent side="right">
               <nav className="grid gap-4 text-lg font-medium mt-8">
                 <Link href="/" className="flex items-center gap-2 text-lg font-semibold mb-4">
-                  <Mountain className="h-6 w-6" />
+                  <Logo className="h-8 w-8" />
                   <span>Suara Kita</span>
                 </Link>
                 <Link href="/" className="hover:text-primary transition-colors">Beranda</Link>
