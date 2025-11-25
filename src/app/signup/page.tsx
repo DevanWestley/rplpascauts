@@ -14,7 +14,7 @@ import { useCreateUserWithEmailAndPassword } from "react-firebase-hooks/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth, useFirestore, useUser } from "@/firebase";
 import { setDocumentNonBlocking } from "@/firebase/non-blocking-updates";
@@ -41,6 +41,19 @@ export default function SignupPage() {
   const [isOtpSent, setIsOtpSent] = useState(false);
   
   const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
+
+  const form = useForm<SignupFormValues>({
+    resolver: zodResolver(signupFormSchema),
+    mode: "onChange",
+    defaultValues: {
+        firstName: "",
+        lastName: "",
+        email: "",
+        password: "",
+        phone: "",
+        otp: "",
+    }
+  });
 
   const setupRecaptcha = useCallback(() => {
     if (!auth || recaptchaVerifierRef.current) return;
