@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -5,17 +6,17 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { doc } from "firebase/firestore";
-import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult, UserCredential, EmailAuthProvider, linkWithCredential } from "firebase/auth";
-import { useAuthState, useCreateUserWithEmailAndPassword } from "react-firebase-hooks/auth";
+import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult, EmailAuthProvider, linkWithCredential } from "firebase/auth";
+import { useCreateUserWithEmailAndPassword } from "react-firebase-hooks/auth";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth, useFirestore } from "@/firebase";
+import { useAuth, useFirestore, useUser } from "@/firebase";
 import { setDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 
 const signupFormSchema = z.object({
@@ -32,32 +33,34 @@ type SignupFormValues = z.infer<typeof signupFormSchema>;
 export default function SignupPage() {
   const auth = useAuth();
   const firestore = useFirestore();
-  const [user, isUserLoading] = useAuthState(auth);
-  const [createUserWithEmailAndPassword, , ,] = useCreateUserWithEmailAndPassword(auth);
+  const { user, isUserLoading } = useUser();
+  const [createUserWithEmailAndPassword] = useCreateUserWithEmailAndPassword(auth);
   const router = useRouter();
   const { toast } = useToast();
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
   const [isOtpSent, setIsOtpSent] = useState(false);
-
-  const form = useForm<SignupFormValues>({
-    resolver: zodResolver(signupFormSchema),
-    mode: "onChange",
-  });
+  
+  const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
 
   const setupRecaptcha = useCallback(() => {
-    if (!auth) return;
-    if (!(window as any).recaptchaVerifier) {
-      (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        'size': 'invisible',
-        'callback': () => {
-          // reCAPTCHA solved, allow signInWithPhoneNumber.
-        }
-      });
+    if (!auth || recaptchaVerifierRef.current) return;
+
+    const recaptchaContainer = document.getElementById('recaptcha-container');
+    if (recaptchaContainer) {
+        recaptchaVerifierRef.current = new RecaptchaVerifier(auth, recaptchaContainer, {
+            'size': 'invisible',
+            'callback': () => {
+              // reCAPTCHA solved, allow signInWithPhoneNumber.
+            }
+        });
+        recaptchaVerifierRef.current.render();
     }
   }, [auth]);
 
   useEffect(() => {
-    setupRecaptcha();
+    if (document.getElementById('recaptcha-container')) {
+        setupRecaptcha();
+    }
   }, [setupRecaptcha]);
 
   useEffect(() => {
@@ -67,12 +70,13 @@ export default function SignupPage() {
   }, [user, isUserLoading, router]);
 
   async function onSubmit(data: SignupFormValues) {
-    if (!auth) return;
+    if (!auth || !recaptchaVerifierRef.current) return;
     
+    const appVerifier = recaptchaVerifierRef.current;
+
     if (!isOtpSent) {
       // Send OTP
       try {
-        const appVerifier = (window as any).recaptchaVerifier;
         const result = await signInWithPhoneNumber(auth, data.phone, appVerifier);
         setConfirmationResult(result);
         setIsOtpSent(true);
@@ -86,9 +90,13 @@ export default function SignupPage() {
           title: "Gagal Mengirim OTP",
           description: error.message,
         });
-        (window as any).recaptchaVerifier.render().then((widgetId: any) => {
-            grecaptcha.reset(widgetId);
-        });
+        // Reset reCAPTCHA
+        if (appVerifier) {
+            appVerifier.render().then((widgetId) => {
+              // @ts-ignore
+              grecaptcha.reset(widgetId);
+            });
+        }
       }
     } else {
       // Verify OTP and create user
@@ -103,6 +111,7 @@ export default function SignupPage() {
         // Create user with email and password
         const emailUserCredential = await createUserWithEmailAndPassword(data.email, data.password);
         if (!emailUserCredential) {
+            await phoneUser.delete();
             throw new Error("Gagal membuat akun dengan email.");
         }
 
@@ -110,12 +119,14 @@ export default function SignupPage() {
 
         // Link phone auth to email/password user
         const emailCredential = EmailAuthProvider.credential(data.email, data.password);
-        await linkWithCredential(phoneUser, emailCredential);
+        await linkWithCredential(emailUser, emailCredential);
+        // After linking, the current user is now `emailUser` which contains both credentials.
+        // We can now safely delete the temporary phone user.
+        await phoneUser.delete();
 
-        // At this point, the user is signed in with both methods, but the primary user object is the one from the link operation.
-        // We'll use the final user object from auth state to ensure consistency.
-        const authUnsubscribe = auth.onAuthStateChanged(async (finalUser) => {
-          if (finalUser) {
+        const finalUser = auth.currentUser;
+
+        if (finalUser) {
             const userRef = doc(firestore, "users", finalUser.uid);
             const userData = {
               id: finalUser.uid,
@@ -134,10 +145,9 @@ export default function SignupPage() {
               description: "Akun Anda telah berhasil dibuat dan diverifikasi.",
             });
             router.push('/dashboard');
-            
-            authUnsubscribe();
-          }
-        });
+        } else {
+            throw new Error("Gagal mendapatkan pengguna terakhir setelah proses linking.");
+        }
 
       } catch (error: any) {
         toast({
@@ -155,7 +165,8 @@ export default function SignupPage() {
     return <p>Memuat...</p>;
   }
 
-  if (user) {
+  if (user && !isUserLoading) {
+    // This case should be handled by the redirect effect, but as a fallback
     return null;
   }
 
