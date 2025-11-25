@@ -1,0 +1,101 @@
+/**
+ * Core Philosophy: This ruleset enforces a strict user-ownership model. All data,
+ * including user profiles, petitions, and signatures, is nested under a user's
+ * unique ID (`/users/{userId}`). This ensures that users can only access and
+ * manage their own information, providing a strong security baseline.
+ *
+ * Data Structure: The data is organized hierarchically to reflect ownership:
+ * - /users/{userId}: A user's own profile document.
+ * - /users/{userId}/petitions/{petitionId}: Petitions created by that user.
+ * - /users/{userId}/petitions/{petitionId}/signatures/{signatureId}: Signatures
+ *   collected for one of the user's petitions.
+ *
+ * Key Security Decisions:
+ * - No Public Data: Due to the `/users/{userId}` structure, no data is publicly
+ *   readable or listable. Access is restricted to the document owner. The
+ *   `visibility` field on a Petition is not used for security rules, as the
+ *   path-based security model takes precedence.
+ * - No User Listing: Listing the top-level `/users` collection is explicitly
+ *   disallowed to prevent user enumeration and protect user privacy.
+ * - Path-Based Authorization: Ownership is determined by the `{userId}` in the
+ *   document path, which is fast, secure, and avoids costly `get()` calls in rules.
+ * - Signature Access: The ability for the public to add signatures is not securely
+ *   possible with the current path structure (`/users/{userId}/...`). Therefore,
+ *   access to the signatures subcollection is restricted to the petition's owner
+ *   for management purposes. A public-facing feature would require a different
+ *   data model (e.g., a top-level `/petitions` collection).
+ *
+ * Denormalization for Authorization: This ruleset relies on the path structure
+ * (`/users/{userId}`) to determine ownership, which is a form of denormalization
+ * that avoids extra database reads. Additionally, on creation, documents like
+ * User profiles and Petitions must contain an internal ID (`id` or `authorId`)
+ * that matches the ID in the path to ensure relational integrity from the start.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions to improve readability and reuse of logic.
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Checks if the requesting user's UID matches the document's owner ID.
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Checks for ownership on an existing document. Used for update/delete.
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
+    }
+
+    /**
+     * @description Rules for the User collection.
+     * @path /users/{userId}
+     * @allow A user (auth.uid='user123') creating their own profile at /users/user123. (create)
+     * @deny An anonymous user trying to read a profile at /users/user123. (get)
+     * @deny A logged-in user (auth.uid='user456') trying to update another user's profile at /users/user123. (update)
+     * @principle Restricts access to a user's own data tree and prevents user enumeration.
+     */
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false;
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow delete: if isExistingOwner(userId);
+
+      /**
+       * @description Rules for the Petitions subcollection, owned by a user.
+       * @path /users/{userId}/petitions/{petitionId}
+       * @allow A user (auth.uid='user123') creating a petition at /users/user123/petitions/abc. (create)
+       * @deny A logged-in user (auth.uid='user456') trying to list petitions at /users/user123/petitions. (list)
+       * @deny The owner (auth.uid='user123') trying to change the `authorId` of an existing petition. (update)
+       * @principle Enforces that only the user who owns the data tree can manage the documents within it.
+       */
+      match /petitions/{petitionId} {
+        allow get: if isOwner(userId);
+        allow list: if isOwner(userId);
+        allow create: if isOwner(userId) && request.resource.data.authorId == userId;
+        allow update: if isExistingOwner(userId) && request.resource.data.authorId == resource.data.authorId;
+        allow delete: if isExistingOwner(userId);
+
+        /**
+         * @description Rules for the Signatures subcollection of a Petition.
+         * @path /users/{userId}/petitions/{petitionId}/signatures/{signatureId}
+         * @allow The petition owner (auth.uid='user123') reading a signature at /users/user123/petitions/abc/signatures/xyz. (get)
+         * @deny Any other user (auth.uid='user456') trying to create a signature for another user's petition. (create)
+         * @deny Any public or anonymous user from listing signatures. (list)
+         * @principle Secures nested data by inheriting ownership from the parent path. The petition owner fully controls the signature data.
+         */
+        match /signatures/{signatureId} {
+          allow get: if isOwner(userId);
+          allow list: if isOwner(userId);
+          allow create: if isOwner(userId) && request.resource.data.petitionId == petitionId;
+          allow update: if isExistingOwner(userId) && request.resource.data.petitionId == resource.data.petitionId;
+          allow delete: if isExistingOwner(userId);
+        }
+      }
+    }
+  }
+}

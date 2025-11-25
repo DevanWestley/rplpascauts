@@ -1,0 +1,241 @@
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user of the Advocacy Alley application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the User entity."
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the user.",
+          "format": "email"
+        },
+        "firstName": {
+          "type": "string",
+          "description": "First name of the user."
+        },
+        "lastName": {
+          "type": "string",
+          "description": "Last name of the user."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the user account was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the user account was last updated.",
+          "format": "date-time"
+        },
+        "role": {
+          "type": "string",
+          "description": "Role of the user (e.g., admin, user).",
+          "format": "string"
+        }
+      },
+      "required": [
+        "id",
+        "email",
+        "firstName",
+        "lastName",
+        "createdAt",
+        "updatedAt",
+        "role"
+      ]
+    },
+    "Petition": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Petition",
+      "type": "object",
+      "description": "Represents a petition created by a user.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Petition entity."
+        },
+        "authorId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Petition) The user who created the petition."
+        },
+        "title": {
+          "type": "string",
+          "description": "Title of the petition."
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed description of the petition's purpose."
+        },
+        "targetSignatures": {
+          "type": "number",
+          "description": "Target number of signatures required for the petition."
+        },
+        "category": {
+          "type": "string",
+          "description": "Category of the petition (e.g., environmental, social)."
+        },
+        "attachmentUrl": {
+          "type": "string",
+          "description": "URL of the supporting document or image for the petition.",
+          "format": "uri"
+        },
+        "expiryDate": {
+          "type": "string",
+          "description": "Date when the petition expires.",
+          "format": "date-time"
+        },
+        "visibility": {
+          "type": "string",
+          "description": "Visibility setting of the petition (public or private)."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the petition was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the petition was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "authorId",
+        "title",
+        "description",
+        "targetSignatures",
+        "category",
+        "expiryDate",
+        "visibility",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Signature": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Signature",
+      "type": "object",
+      "description": "Represents a user's signature on a petition.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Signature entity."
+        },
+        "petitionId": {
+          "type": "string",
+          "description": "Reference to Petition. (Relationship: Petition 1:N Signature) The petition being signed."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Signature) The user who signed the petition. Can be null if signed without account."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the signer."
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the signer.",
+          "format": "email"
+        },
+        "location": {
+          "type": "string",
+          "description": "Optional location of the signer."
+        },
+        "comment": {
+          "type": "string",
+          "description": "Optional comment provided by the signer."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the signature was recorded.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "petitionId",
+        "name",
+        "email",
+        "createdAt"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profile information. The path-based ownership ensures that only the authenticated user (or an admin, if implemented) can access their own data.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/petitions/{petitionId}",
+        "definition": {
+          "entityName": "Petition",
+          "schema": {
+            "$ref": "#/backend/entities/Petition"
+          },
+          "description": "Stores petitions created by a user. Path-based ownership: Only the authenticated user with matching {userId} can create, read, update, or delete petitions under their path.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user who created the petition."
+            },
+            {
+              "name": "petitionId",
+              "description": "The unique identifier of the petition."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/petitions/{petitionId}/signatures/{signatureId}",
+        "definition": {
+          "entityName": "Signature",
+          "schema": {
+            "$ref": "#/backend/entities/Signature"
+          },
+          "description": "Stores signatures for a specific petition. The signatures are stored as a subcollection of the petition to maintain the relationship.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user who created the parent petition."
+            },
+            {
+              "name": "petitionId",
+              "description": "The unique identifier of the petition being signed."
+            },
+            {
+              "name": "signatureId",
+              "description": "The unique identifier of the signature."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "This Firestore structure prioritizes security and scalability for the Advocacy Alley application, focusing on authorization independence and clear access patterns. It leverages path-based ownership for user-related data and a segregated structure to simplify security rules.\n\n*   **Authorization Independence:** The structure avoids `get()` calls in security rules by denormalizing authorization data.  Petitions are stored under the `/users/{userId}/petitions/{petitionId}` path, making the `authorId` implicit in the path and accessible without needing a `get()` operation in the rules.\n\n*   **Structural Segregation:**  User data and Petition data are stored in separate collections, each with its own security profile.\n\n*   **Access Modeling:** Path-based ownership `/users/{userId}/petitions/{petitionId}` makes ownership clear and secure. Signatures are stored as subcollections of Petitions to clearly define their relationship.\n\n*   **QAPs (Rules are not Filters):** The structure facilitates secure `list` operations.  Listing petitions under a user's path `/users/{userId}/petitions` only requires checking the user's authentication. Public petitions could potentially be listed in a separate, dedicated collection if that feature is expanded. However, the current design focuses on user-created petitions.\n\nThe absence of a global roles collection (`/roles_admin/{uid}`) is intentional, as the initial requirements do not explicitly call for admin roles or any role other than 'user'. If the app evolves to include global admin roles, a dedicated collection as outlined in the design principles should be added.\n\nThis structure ensures that security rules are simple, robust, and easily debuggable, minimizing complexity and potential vulnerabilities."
+  }
+}
