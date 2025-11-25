@@ -98,10 +98,14 @@ export default function SignupPage() {
           description: "Silakan periksa ponsel Anda untuk kode verifikasi.",
         });
       } catch (error: any) {
+        let description = error.message;
+        if (error.code === 'auth/operation-not-allowed') {
+            description = "Pastikan otentikasi telepon diaktifkan di Konsol Firebase Anda.";
+        }
         toast({
           variant: "destructive",
           title: "Gagal Mengirim OTP",
-          description: error.message,
+          description: description,
         });
         // Reset reCAPTCHA
         if (appVerifier) {
