@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link"
@@ -31,6 +32,10 @@ export default function LoginPage() {
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginFormSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
     mode: "onChange",
   });
 
