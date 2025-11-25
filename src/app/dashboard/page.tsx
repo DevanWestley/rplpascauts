@@ -1,3 +1,11 @@
+
+"use client";
+
+import { useMemo } from 'react';
+import { notFound, useRouter } from 'next/navigation';
+import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
+import { collection, query, where } from 'firebase/firestore';
+
 import {
   Card,
   CardContent,
@@ -15,58 +23,73 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { SignaturesChart } from "@/components/signatures-chart"
-import { TrafficChart } from "@/components/traffic-chart"
 import { PetitionCard } from "@/components/petition-card"
 import { BarChart, FileText, TrendingUp, Users } from "lucide-react"
-
-// Mock data
-const userPetitions = [
-  {
-    id: '1',
-    title: 'Lindungi Taman Lokal Kita dari Pembangunan Kota',
-    category: 'Lingkungan',
-    signatures: 1250,
-    target: 5000,
-    image: 'park-image',
-    status: 'active',
-  },
-  {
-    id: '4',
-    title: 'Bangun Penampungan Hewan Baru Tanpa Eutanasia',
-    category: 'Hak-Hak Hewan',
-    signatures: 4112,
-    target: 10000,
-    image: 'animal-shelter-image',
-    status: 'active',
-  },
-  {
-    id: '2',
-    title: 'Tingkatkan Transportasi Publik di Area Pusat Kota',
-    category: 'Pembangunan Kota',
-    signatures: 1000,
-    target: 1000,
-    image: 'bus-image',
-    status: 'ended',
-  },
-];
-
-const recentSignatures = [
-    { name: 'Alice Johnson', location: 'San Francisco, USA', comment: 'Ini sangat penting untuk komunitas kita!', signedAt: '15 menit lalu' },
-    { name: 'Bob Williams', location: 'London, UK', comment: '', signedAt: '1 jam lalu' },
-    { name: 'Charlie Brown', location: 'Sydney, Australia', comment: 'Senang mendukung inisiatif ini.', signedAt: '3 jam lalu' },
-    { name: 'Diana Miller', location: 'Toronto, Canada', comment: 'Kita harus melindungi ruang hijau kita.', signedAt: '5 jam lalu' },
-];
+import { Skeleton } from '@/components/ui/skeleton';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 
 export default function DashboardPage() {
-  const activePetitions = userPetitions.filter(p => p.status === 'active');
-  const endedPetitions = userPetitions.filter(p => p.status === 'ended');
-  const totalSignatures = userPetitions.reduce((sum, p) => sum + p.signatures, 0);
+  const { user, isUserLoading } = useUser();
+  const firestore = useFirestore();
+  const router = useRouter();
+
+  const petitionsCollectionRef = useMemoFirebase(() => {
+    if (!user) return null;
+    return collection(firestore, `users/${user.uid}/petitions`);
+  }, [firestore, user]);
+
+  const { data: userPetitions, isLoading: isLoadingPetitions } = useCollection(petitionsCollectionRef);
+
+  const activePetitions = useMemo(() => userPetitions?.filter(p => new Date(p.expiryDate) > new Date()) || [], [userPetitions]);
+  const endedPetitions = useMemo(() => userPetitions?.filter(p => new Date(p.expiryDate) <= new Date()) || [], [userPetitions]);
+  const totalSignatures = useMemo(() => userPetitions?.reduce((sum, p) => sum + (p.signatures || 0), 0) || 0, [userPetitions]);
+
+  if (isUserLoading) {
+    return (
+        <div className="space-y-8">
+            <header className="space-y-2">
+                <Skeleton className="h-10 w-1/2" />
+                <Skeleton className="h-4 w-3/4" />
+            </header>
+            <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <Skeleton className="h-28" />
+                <Skeleton className="h-28" />
+                <Skeleton className="h-28" />
+                <Skeleton className="h-28" />
+            </section>
+            <section>
+                <Skeleton className="h-10 w-[400px] mb-6" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <Skeleton className="h-96" />
+                    <Skeleton className="h-96" />
+                    <Skeleton className="h-96" />
+                </div>
+            </section>
+        </div>
+    );
+  }
+
+  if (!user) {
+    // Pengguna akan diarahkan dari halaman login, tetapi sebagai fallback
+    router.push('/login');
+    return null;
+  }
+  
+  const mostPopularPetition = userPetitions?.sort((a, b) => (b.signatures || 0) - (a.signatures || 0))[0];
 
   return (
     <div className="space-y-8">
-      <header>
-        <h1 className="text-3xl md:text-4xl font-bold font-headline">Dasbor Saya</h1>
-        <p className="text-muted-foreground">Selamat datang kembali! Berikut adalah gambaran umum dari upaya advokasi Anda.</p>
+       <header className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+        <Avatar className="h-24 w-24">
+            <AvatarImage src={user.photoURL || `https://picsum.photos/seed/${user.uid}/100/100`} data-ai-hint="person face" />
+            <AvatarFallback>{user.email?.charAt(0).toUpperCase()}</AvatarFallback>
+        </Avatar>
+        <div>
+            <h1 className="text-3xl md:text-4xl font-bold font-headline">Dasbor Saya</h1>
+            <p className="text-muted-foreground text-lg">Selamat datang kembali, {user.displayName || user.email}!</p>
+            <p className="text-muted-foreground">Berikut adalah gambaran umum dari upaya advokasi Anda.</p>
+        </div>
       </header>
 
       <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -96,30 +119,42 @@ export default function DashboardPage() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold truncate">Lindungi Taman Kita</div>
-            <p className="text-xs text-muted-foreground">dengan {userPetitions[0].signatures.toLocaleString('id-ID')} tanda tangan</p>
+            {mostPopularPetition ? (
+                <>
+                    <div className="text-2xl font-bold truncate">{mostPopularPetition.title}</div>
+                    <p className="text-xs text-muted-foreground">dengan {(mostPopularPetition.signatures || 0).toLocaleString('id-ID')} tanda tangan</p>
+                </>
+            ) : (
+                <div className="text-2xl font-bold">-</div>
+            )}
           </CardContent>
         </Card>
          <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Rata-rata Progres</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Petisi</CardTitle>
             <BarChart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">75%</div>
-            <p className="text-xs text-muted-foreground">Rata-rata progres menuju target</p>
+            <div className="text-2xl font-bold">{userPetitions?.length || 0}</div>
+            <p className="text-xs text-muted-foreground">Total petisi yang telah Anda buat</p>
           </CardContent>
         </Card>
       </section>
 
       <section>
+         <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-bold font-headline">Petisi Saya</h2>
+            <Button onClick={() => router.push('/petitions/create')}>Buat Petisi Baru</Button>
+        </div>
         <Tabs defaultValue="active">
           <TabsList className="grid w-full grid-cols-2 md:w-[400px]">
             <TabsTrigger value="active">Petisi Aktif</TabsTrigger>
             <TabsTrigger value="ended">Petisi Berakhir</TabsTrigger>
           </TabsList>
           <TabsContent value="active" className="mt-6">
-            {activePetitions.length > 0 ? (
+            {isLoadingPetitions ? (
+                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"><Skeleton className="h-96" /><Skeleton className="h-96" /><Skeleton className="h-96" /></div>
+            ) : activePetitions.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {activePetitions.map((petition) => (
                         <PetitionCard key={petition.id} petition={petition} />
@@ -130,7 +165,9 @@ export default function DashboardPage() {
             )}
           </TabsContent>
           <TabsContent value="ended" className="mt-6">
-            {endedPetitions.length > 0 ? (
+            {isLoadingPetitions ? (
+                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"><Skeleton className="h-96" /><Skeleton className="h-96" /><Skeleton className="h-96" /></div>
+            ) : endedPetitions.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {endedPetitions.map((petition) => (
                         <PetitionCard key={petition.id} petition={petition} />
@@ -143,45 +180,16 @@ export default function DashboardPage() {
         </Tabs>
       </section>
 
-      <section className="space-y-4">
-        <h2 className="text-2xl font-bold font-headline">Analitik Petisi: <span className="text-primary/90">{userPetitions[0].title}</span></h2>
-        <div className="grid gap-8 lg:grid-cols-2">
-          <SignaturesChart />
-          <TrafficChart />
-        </div>
-      </section>
+      {mostPopularPetition && (
+        <section className="space-y-4">
+            <h2 className="text-2xl font-bold font-headline">Analitik Petisi: <span className="text-primary/90">{mostPopularPetition.title}</span></h2>
+            <div className="grid gap-8 lg:grid-cols-2">
+            <SignaturesChart />
+            <TrafficChart />
+            </div>
+        </section>
+      )}
 
-      <section>
-        <Card>
-          <CardHeader>
-            <CardTitle>Pendukung Terbaru</CardTitle>
-            <CardDescription>Tanda tangan terbaru di semua petisi aktif Anda.</CardDescription>
-          </CardHeader>
-          <CardContent>
-             <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Pendukung</TableHead>
-                  <TableHead className="hidden sm:table-cell">Komentar</TableHead>
-                  <TableHead className="text-right">Menandatangani</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {recentSignatures.map((supporter, index) => (
-                  <TableRow key={index}>
-                    <TableCell>
-                      <p className="font-semibold">{supporter.name}</p>
-                      <p className="text-sm text-muted-foreground">{supporter.location}</p>
-                    </TableCell>
-                     <TableCell className="hidden sm:table-cell italic max-w-xs truncate">{supporter.comment || "Tidak ada komentar"}</TableCell>
-                    <TableCell className="text-right text-xs text-muted-foreground">{supporter.signedAt}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      </section>
     </div>
   )
 }

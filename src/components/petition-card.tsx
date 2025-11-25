@@ -13,7 +13,8 @@ interface Petition {
   category: string;
   signatures: number;
   target: number;
-  image: string; // Corresponds to id in placeholder-images.json
+  image?: string; // Corresponds to id in placeholder-images.json
+  attachmentUrl?: string; // Can be used directly as image src
 }
 
 interface PetitionCardProps {
@@ -22,23 +23,26 @@ interface PetitionCardProps {
 
 export function PetitionCard({ petition }: PetitionCardProps) {
   const percentage = (petition.signatures / petition.target) * 100;
-  const image: ImagePlaceholder | undefined = PlaceHolderImages.find(p => p.id === petition.image);
+  const image: ImagePlaceholder | undefined = petition.image ? PlaceHolderImages.find(p => p.id === petition.image) : undefined;
+  const imageUrl = petition.attachmentUrl || image?.imageUrl;
 
   return (
     <Card className="flex flex-col h-full overflow-hidden transition-shadow hover:shadow-lg duration-300">
       <CardHeader className="p-0">
         <Link href={`/petitions/${petition.id}`} className="block relative aspect-[4/3]">
-          {image ? (
+          {imageUrl ? (
             <Image
-              src={image.imageUrl}
-              alt={image.description}
-              data-ai-hint={image.imageHint}
+              src={imageUrl}
+              alt={petition.title}
+              data-ai-hint={image?.imageHint || "petition image"}
               fill
               className="object-cover rounded-t-lg"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           ) : (
-            <div className="bg-muted w-full h-full"></div>
+            <div className="bg-muted w-full h-full flex items-center justify-center">
+                <span className="text-muted-foreground text-sm">Tidak ada gambar</span>
+            </div>
           )}
           <Badge variant="secondary" className="absolute top-3 left-3">{petition.category}</Badge>
         </Link>
