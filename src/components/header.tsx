@@ -1,4 +1,8 @@
+
+"use client";
+
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import {
@@ -13,9 +17,17 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Menu, User } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Logo } from './logo';
+import { useAuth, useUser } from '@/firebase';
 
 export function Header() {
-  const isLoggedIn = true; // Placeholder for authentication state
+  const { user, isUserLoading } = useUser();
+  const auth = useAuth();
+  const router = useRouter();
+
+  const handleSignOut = () => {
+    auth.signOut();
+    router.push('/');
+  };
 
   return (
     <header className="bg-card shadow-sm sticky top-0 z-40">
@@ -34,30 +46,34 @@ export function Header() {
           <Button asChild>
             <Link href="/petitions/create">Mulai Petisi</Link>
           </Button>
-          {isLoggedIn ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="secondary" size="icon" className="rounded-full">
-                  <Avatar>
-                    <AvatarImage src="https://picsum.photos/seed/user-avatar/40/40" alt="User avatar" data-ai-hint="person face" />
-                    <AvatarFallback><User /></AvatarFallback>
-                  </Avatar>
-                  <span className="sr-only">Buka menu pengguna</span>
+          {!isUserLoading && (
+            <>
+              {user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="secondary" size="icon" className="rounded-full">
+                      <Avatar>
+                        <AvatarImage src={user.photoURL || "https://picsum.photos/seed/user-avatar/40/40"} alt="User avatar" data-ai-hint="person face" />
+                        <AvatarFallback><User /></AvatarFallback>
+                      </Avatar>
+                      <span className="sr-only">Buka menu pengguna</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>Akun Saya</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild><Link href="/dashboard">Dasbor</Link></DropdownMenuItem>
+                    <DropdownMenuItem disabled>Pengaturan</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleSignOut}>Keluar</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Button variant="outline" asChild>
+                  <Link href="/login">Masuk</Link>
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Akun Saya</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild><Link href="/dashboard">Dasbor</Link></DropdownMenuItem>
-                <DropdownMenuItem disabled>Pengaturan</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>Keluar</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <Button variant="outline" asChild>
-              <Link href="/login">Masuk</Link>
-            </Button>
+              )}
+            </>
           )}
         </nav>
         <div className="md:hidden">
@@ -82,14 +98,18 @@ export function Header() {
                 <Link href="/#petitions" className="hover:text-primary transition-colors">Jelajahi</Link>
                 <Link href="/petitions/create" className="hover:text-primary transition-colors">Mulai Petisi</Link>
                 <Separator />
-                {isLoggedIn ? (
+                {!isUserLoading && (
                   <>
-                    <Link href="/dashboard" className="hover:text-primary transition-colors">Dasbor</Link>
-                    <Link href="#" className="text-muted-foreground cursor-not-allowed">Pengaturan</Link>
-                    <Link href="#" className="hover:text-primary transition-colors">Keluar</Link>
+                    {user ? (
+                      <>
+                        <Link href="/dashboard" className="hover:text-primary transition-colors">Dasbor</Link>
+                        <Link href="#" className="text-muted-foreground cursor-not-allowed">Pengaturan</Link>
+                        <button onClick={handleSignOut} className="text-left hover:text-primary transition-colors">Keluar</button>
+                      </>
+                    ) : (
+                      <Link href="/login" className="hover:text-primary transition-colors">Masuk</Link>
+                    )}
                   </>
-                ) : (
-                  <Link href="/login" className="hover:text-primary transition-colors">Masuk</Link>
                 )}
               </nav>
             </SheetContent>
