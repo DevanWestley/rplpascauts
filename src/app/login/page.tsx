@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { useSignInWithEmailAndPassword } from "react-firebase-hooks/auth";
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -14,7 +15,6 @@ import { Label } from "@/components/ui/label"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { useToast } from "@/hooks/use-toast"
 import { useAuth, useUser } from "@/firebase";
-import { initiateEmailSignIn } from "@/firebase/non-blocking-login";
 import { useEffect } from "react";
 
 const loginFormSchema = z.object({
@@ -27,6 +27,7 @@ type LoginFormValues = z.infer<typeof loginFormSchema>
 export default function LoginPage() {
   const auth = useAuth();
   const { user, isUserLoading } = useUser();
+  const [signInWithEmailAndPassword, _, loading, error] = useSignInWithEmailAndPassword(auth);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -45,12 +46,19 @@ export default function LoginPage() {
     }
   }, [user, isUserLoading, router]);
 
-  function onSubmit(data: LoginFormValues) {
-    initiateEmailSignIn(auth, data.email, data.password);
-    toast({
-      title: "Memproses Masuk...",
-      description: "Anda akan segera diarahkan.",
-    });
+  useEffect(() => {
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Gagal Masuk",
+        description: "Email atau kata sandi salah. Silakan coba lagi.",
+      });
+    }
+  }, [error, toast]);
+  
+
+  async function onSubmit(data: LoginFormValues) {
+    await signInWithEmailAndPassword(data.email, data.password);
   }
 
   if (isUserLoading || user) {
@@ -100,8 +108,8 @@ export default function LoginPage() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-                Masuk
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? "Memproses..." : "Masuk"}
               </Button>
             </form>
           </Form>
